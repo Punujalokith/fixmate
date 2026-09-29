@@ -1,0 +1,41 @@
+# Render "Blueprint": deploys the API (Docker) and the admin site (static) in one click.
+# Render dashboard → New → Blueprint → pick this repo.
+# You provide a Postgres URL (e.g. Neon free tier) and a Redis URL (e.g. Upstash free tier).
+services:
+  - type: web
+    name: fixmate-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # paste your Neon/Postgres connection string in the dashboard
+      - key: REDIS_URL
+        sync: false # paste your Upstash rediss:// URL in the dashboard
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: PUBLIC_BASE_URL
+        sync: false # e.g. https://fixmate-api.onrender.com
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://fixmate-admin.onrender.com
+      - key: ANTHROPIC_API_KEY
+        sync: false # optional: enables the Claude AI assistant
+      - key: FIREBASE_SERVICE_ACCOUNT_PATH
+        value: ''
+
+  - type: web
+    name: fixmate-admin
+    runtime: static
+    rootDir: admin
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false # e.g. https://fixmate-api.onrender.com/api/v1
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
