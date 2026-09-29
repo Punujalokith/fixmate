@@ -40,7 +40,7 @@ export class AdminService {
   async stats() {
     const since30 = new Date(Date.now() - 30 * DAY);
     const since14 = new Date(Date.now() - 13 * DAY);
-    since14.setHours(0, 0, 0, 0);
+    since14.setUTCHours(0, 0, 0, 0); // UTC day boundaries, matching date_trunc on UTC timestamps
 
     const [users, businesses, verified, bookingsByStatus, revenueAll, revenue30, daily, topCategories, ai] = await Promise.all([
       this.prisma.user.groupBy({ by: ['role'], _count: { _all: true } }),
@@ -67,8 +67,9 @@ export class AdminService {
 
     const days = Array.from({ length: 14 }, (_, i) => {
       const d = new Date(since14.getTime() + i * DAY);
-      const row = daily.find((r) => new Date(r.day).toDateString() === d.toDateString());
-      return { day: d.toISOString().slice(0, 10), bookings: row?.bookings ?? 0, completed: row?.completed ?? 0 };
+      const key = d.toISOString().slice(0, 10);
+      const row = daily.find((r) => new Date(r.day).toISOString().slice(0, 10) === key);
+      return { day: key, bookings: row?.bookings ?? 0, completed: row?.completed ?? 0 };
     });
     const totalBookings = bookingsByStatus.reduce((sum, s) => sum + s._count._all, 0);
     const completed = bookingsByStatus.find((s) => s.status === 'COMPLETED')?._count._all ?? 0;

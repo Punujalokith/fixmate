@@ -236,8 +236,10 @@ export class MarketplaceService {
 
   async dashboard(ownerId: string) {
     const business = await this.requireBusiness(ownerId);
-    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const sixMonthsAgo = new Date(new Date().getFullYear(), new Date().getMonth() - 5, 1);
+    // Work in UTC: the database stores UTC, and local-midnight dates shift months in UTC+5:30.
+    const now = new Date();
+    const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const sixMonthsAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1));
 
     const [byStatus, allTime, thisMonth, monthly, upcoming] = await Promise.all([
       this.prisma.booking.groupBy({ by: ['status'], where: { businessId: business.id }, _count: { _all: true } }),
@@ -269,10 +271,11 @@ export class MarketplaceService {
     ]);
 
     // Fill in months with no earnings so the chart always has 6 bars.
+    const monthKey = (d: Date) => d.toISOString().slice(0, 7); // "2026-09"
     const months = Array.from({ length: 6 }, (_, i) => {
-      const d = new Date(sixMonthsAgo.getFullYear(), sixMonthsAgo.getMonth() + i, 1);
-      const row = monthly.find((m) => new Date(m.month).getMonth() === d.getMonth() && new Date(m.month).getFullYear() === d.getFullYear());
-      return { month: d.toISOString().slice(0, 7), total: row?.total ?? 0, jobs: row?.jobs ?? 0 };
+      const key = monthKey(new Date(Date.UTC(sixMonthsAgo.getUTCFullYear(), sixMonthsAgo.getUTCMonth() + i, 1)));
+      const row = monthly.find((m) => monthKey(new Date(m.month)) === key);
+      return { month: key, total: row?.total ?? 0, jobs: row?.jobs ?? 0 };
     });
 
     return {

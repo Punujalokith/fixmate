@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+uploads
+uploads-test
+src/generated
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.agents
+.claude
+.windsurf
+skills-lock.json
+test
