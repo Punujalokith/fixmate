@@ -27,7 +27,7 @@ export const envValidationSchema = Joi.object({
 
   // Optional integrations: features fall back gracefully when these are empty.
   ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
-  ANTHROPIC_MODEL: Joi.string().default('claude-haiku-4-5'),
+  ANTHROPIC_MODEL: Joi.string().default('claude-opus-5-5'),
   FIREBASE_SERVICE_ACCOUNT_PATH: Joi.string().allow('').optional(),
 
   // Rate limiting (requests per minute)

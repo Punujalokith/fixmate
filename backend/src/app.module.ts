@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AdminModule } from './admin/admin.module.js';
+import { AiModule } from './ai/ai.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuditModule } from './audit/audit.module.js';
@@ -57,6 +59,8 @@ import { UsersModule } from './users/users.module.js';
     BookingsModule,
     ChatModule,
     FilesModule,
+    AiModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

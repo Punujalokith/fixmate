@@ -1,11 +1,24 @@
 import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { mkdirSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.js';
 
 // Shared by main.ts and the e2e tests so both run the app exactly the same way.
 export function configureApp(app: INestApplication) {
   const config = app.get(ConfigService);
+
+  // Serve uploaded files at /uploads/... (express.static blocks "../" path tricks).
+  const uploadDir = resolve(config.get<string>('UPLOAD_DIR', 'uploads'));
+  mkdirSync(uploadDir, { recursive: true });
+  (app as NestExpressApplication).useStaticAssets(uploadDir, {
+    prefix: '/uploads/',
+    index: false,
+    dotfiles: 'deny',
+    maxAge: '7d',
+  });
 
   // All routes live under /api/v1/...
   app.setGlobalPrefix('api');
