@@ -1,0 +1,45 @@
+# Local development databases for FixMate.
+# Start:  docker compose up -d
+# Stop:   docker compose down        (data is kept)
+# Reset:  docker compose down -v     (deletes all data)
+
+# Fixed project name so renaming the folder doesn't create new containers/volumes.
+name: fixmate
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: fixmate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fixmate
+      POSTGRES_PASSWORD: fixmate_dev_password
+      POSTGRES_DB: fixmate
+    ports:
+      - '5433:5432' # 5433 on your laptop (5432 is used by NearCart)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U fixmate -d fixmate']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: fixmate-redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6380:6379' # 6380 on your laptop (6379 is used by NearCart)
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
