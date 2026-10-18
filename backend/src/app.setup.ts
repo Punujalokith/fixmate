@@ -10,6 +10,11 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter.
 export function configureApp(app: INestApplication) {
   const config = app.get(ConfigService);
 
+  // Behind a hosting proxy, read the real client IP from X-Forwarded-For.
+  // Without this, rate limiting would treat every user as the same IP.
+  const proxyHops = config.get<number>('TRUST_PROXY_HOPS', 0);
+  if (proxyHops > 0) (app as NestExpressApplication).set('trust proxy', proxyHops);
+
   // Serve uploaded files at /uploads/... (express.static blocks "../" path tricks).
   const uploadDir = resolve(config.get<string>('UPLOAD_DIR', 'uploads'));
   mkdirSync(uploadDir, { recursive: true });

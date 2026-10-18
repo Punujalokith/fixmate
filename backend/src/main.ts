@@ -9,13 +9,13 @@ async function bootstrap() {
   configureApp(app);
 
   const config = app.get(ConfigService);
-  if (config.get('NODE_ENV') !== 'production') {
-    setupSwagger(app);
-  }
+  const swagger = config.get('NODE_ENV') !== 'production' || config.get<boolean>('ENABLE_SWAGGER');
+  if (swagger) setupSwagger(app);
 
   const port = config.get<number>('PORT', 3000);
   await app.listen(port);
-  Logger.log(`API ready on http://localhost:${port}/api/v1`, 'Bootstrap');
-  Logger.log(`Swagger docs on http://localhost:${port}/api/docs`, 'Bootstrap');
+  const base = config.get<string>('PUBLIC_BASE_URL', `http://localhost:${port}`);
+  Logger.log(`API ready on ${base}/api/v1`, 'Bootstrap');
+  if (swagger) Logger.log(`Swagger docs on ${base}/api/docs`, 'Bootstrap');
 }
 await bootstrap();

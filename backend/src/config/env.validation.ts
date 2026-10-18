@@ -4,8 +4,13 @@ import Joi from 'joi';
 export const envValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   PORT: Joi.number().port().default(3000),
-  PUBLIC_BASE_URL: Joi.string().uri().default('http://localhost:3000'),
+  // Public address of this API (used in uploaded-file links). On Render, RENDER_EXTERNAL_URL is set automatically.
+  PUBLIC_BASE_URL: Joi.string().uri().default(process.env['RENDER_EXTERNAL_URL'] ?? 'http://localhost:3000'),
   CORS_ORIGINS: Joi.string().default('*'),
+  // Swagger docs at /api/docs. Always on in development; set true to keep them in production.
+  ENABLE_SWAGGER: Joi.boolean().default(false),
+  // Number of proxies in front of the API (Render/Heroku-style hosts = 1). Needed for correct client IPs.
+  TRUST_PROXY_HOPS: Joi.number().integer().min(0).default(0),
 
   DATABASE_URL: Joi.string().uri({ scheme: ['postgresql', 'postgres'] }).required(),
   REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),

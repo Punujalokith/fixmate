@@ -1,28 +1,40 @@
-# Render "Blueprint": deploys the API (Docker) and the admin site (static) in one click.
+# Render "Blueprint": deploys Redis, the API (Docker) and the admin site (static) in one go.
 # Render dashboard → New → Blueprint → pick this repo.
-# You provide a Postgres URL (e.g. Neon free tier) and a Redis URL (e.g. Upstash free tier).
+# You only paste a PostgreSQL connection string (Neon free tier) — everything else is created here.
 services:
+  # Redis for background jobs (BullMQ) and caching. Private: only the API can reach it.
+  - type: keyvalue
+    name: fixmate-redis
+    plan: free
+    region: singapore
+    maxmemoryPolicy: noeviction # BullMQ needs keys to never be evicted
+    ipAllowList: []
+
   - type: web
     name: fixmate-api
     runtime: docker
     rootDir: backend
     plan: free
+    region: singapore # closest Render region to Sri Lanka
     healthCheckPath: /api/v1/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false # paste your Neon/Postgres connection string in the dashboard
+        sync: false # paste your Neon connection string when Render asks
       - key: REDIS_URL
-        sync: false # paste your Upstash rediss:// URL in the dashboard
+        fromService:
+          type: keyvalue
+          name: fixmate-redis
+          property: connectionString
       - key: JWT_ACCESS_SECRET
-        generateValue: true
-      - key: PUBLIC_BASE_URL
-        sync: false # e.g. https://fixmate-api.onrender.com
-      - key: CORS_ORIGINS
-        sync: false # e.g. https://fixmate-admin.onrender.com
+        generateValue: true # Render creates a long random secret
+      - key: TRUST_PROXY_HOPS
+        value: '1'
+      - key: ENABLE_SWAGGER
+        value: 'true' # keep API docs visible at /api/docs for the portfolio
       - key: ANTHROPIC_API_KEY
-        sync: false # optional: enables the Claude AI assistant
+        sync: false # optional: leave empty to use the offline keyword assistant
       - key: FIREBASE_SERVICE_ACCOUNT_PATH
         value: ''
 
@@ -34,7 +46,7 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        sync: false # e.g. https://fixmate-api.onrender.com/api/v1
+        sync: false # https://<your-api>.onrender.com/api/v1
     routes:
       - type: rewrite
         source: /*
