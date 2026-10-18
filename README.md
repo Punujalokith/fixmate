@@ -1,5 +1,7 @@
 # FixMate — Home Services Marketplace 🇱🇰
 
+[![CI](https://github.com/Punujalokith/fixmate/actions/workflows/ci.yml/badge.svg)](https://github.com/Punujalokith/fixmate/actions/workflows/ci.yml)
+
 FixMate connects customers in Sri Lanka with trusted local professionals — plumbers, electricians, AC technicians, cleaners and more. Customers describe a problem in plain words, an **AI assistant** works out which service they need, and they book a verified provider in a few taps. Providers manage jobs, services, working hours and earnings from the same app, and admins run the platform from a web console.
 
 | Part | Tech | Folder |
