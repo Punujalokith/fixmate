@@ -10,6 +10,7 @@ NestJS + PostgreSQL (Prisma) + Redis (BullMQ) + Socket.IO. See the [project READ
 | `npm run db:migrate -- --name <change>` | Create and apply a migration after editing `prisma/schema.prisma` |
 | `npm run db:seed` | Load demo data (safe to run again) |
 | `npm run db:studio` | Browse the database in the browser |
+| `npm run db:clean-test` | Show leftover test data (`@test.lk` users); add `-- --yes` to delete it |
 | `npm test` | Unit tests |
 | `npm run test:e2e` | End-to-end tests against the `fixmate_test` database |
 | `npm run lint` | Lint |
