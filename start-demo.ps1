@@ -71,7 +71,22 @@ if (-not $ip) {
       $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254*' -and $_.InterfaceAlias -notmatch 'vEthernet|WSL|Loopback'
     } | Select-Object -First 1).IPAddress
 }
-Write-Host "Laptop address: $ip" -ForegroundColor Green
+
+# USB mode: if an Android phone with USB debugging is plugged in, tunnel the ports through the cable.
+# Then the phone needs no Wi-Fi and the firewall doesn't matter.
+$adb = Join-Path $env:LOCALAPPDATA 'Android\sdk\platform-tools\adb.exe'
+$usb = $false
+if (Test-Path $adb) {
+  $devices = & $adb devices | Select-String -Pattern '\tdevice$'
+  if ($devices) {
+    & $adb reverse tcp:3000 tcp:3000 | Out-Null
+    & $adb reverse tcp:8081 tcp:8081 | Out-Null
+    $usb = $true
+    $ip = '127.0.0.1'
+    Write-Host 'Phone found on USB - using the cable (no Wi-Fi needed).' -ForegroundColor Green
+  }
+}
+Write-Host "Laptop address for the phone: $ip" -ForegroundColor Green
 
 # Free the ports if an old run is still holding them.
 foreach ($port in 3000, 5173, 8081) {
@@ -108,6 +123,13 @@ Start-Process powershell -WorkingDirectory (Join-Path $root 'mobile') -ArgumentL
 
 if (Wait-Http 'http://localhost:5173' 60) { Start-Process 'http://localhost:5173' }
 Start-Process "http://localhost:3000/api/docs"
+
+# USB mode: open FixMate in Expo Go on the phone automatically once Metro is ready.
+if ($usb -and (Wait-Http 'http://127.0.0.1:8081/status' 120)) {
+  & $adb shell am force-stop host.exp.exponent | Out-Null
+  & $adb shell am start -a android.intent.action.VIEW -d 'exp://127.0.0.1:8081' host.exp.exponent | Out-Null
+  Write-Host 'Opened FixMate on the phone.' -ForegroundColor Green
+}
 
 Write-Host @"
 
