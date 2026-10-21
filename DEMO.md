@@ -21,7 +21,7 @@
 |---|---|---|
 | Customer | `customer@fixmate.lk` / `Customer@123` | Phone |
 | Provider (CoolAir AC) | `dilshan@fixmate.lk` / `Provider@123` | Laptop browser (localhost:8081) |
-| Admin | `admin@fixmate.lk` / `Admin@12345` | Laptop browser (localhost:5173) |
+| Admin | `admin@fixmate.lk` / *your own admin password* (set with `SEED_ADMIN_PASSWORD` when seeding the cloud DB) | Laptop browser (localhost:5173) |
 
 ## The 5-minute demo
 
