@@ -86,6 +86,16 @@ REJECTED / EXPIRED       CANCELLED           CANCELLED
 
 ---
 
+## Quick demo (one command)
+
+With Docker Desktop installed and the projects' dependencies installed once (`npm install` in `backend`, `mobile`, `admin`):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\start-demo.ps1
+```
+
+It starts the databases, API, admin site and Expo, and prints the demo logins. See [DEMO.md](DEMO.md) for a 5-minute demo walkthrough.
+
 ## Run it on your laptop
 
 **You need:** Node.js 24+, Docker Desktop, and (for the phone) the **Expo Go** app.
